@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -87,7 +87,7 @@ namespace MatchThreeGame
             } while (points.HasValue);
         }
 
-        private static ((int x1, int y1) point, (int x2, int y2) dir)? FindMatch()
+        private static ((int x, int y) point, (int x, int y) direction)? FindMatch()
         {
             for (int i = 0; i < grid.GetLength(0) - 2; i++)
             {
