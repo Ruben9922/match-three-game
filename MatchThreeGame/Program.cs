@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -6,7 +6,7 @@ namespace MatchThreeGame
 {
     internal static class Program
     {
-        private static readonly Random Random = new Random();
+        private static readonly Random Random = new Random(1234);
 
         // TODO: Allow inputting number of symbols then selecting the specified number of symbols from an alphabet
         // TODO: Remove "colour data" from the grid itself
@@ -17,6 +17,8 @@ namespace MatchThreeGame
             new CellType('C', ConsoleColor.Magenta),
             new CellType('D', ConsoleColor.Green),
         };
+        
+        private static readonly CellType EmptyCellType = new CellType(' ', Console.ForegroundColor);
 
         private static CellType[,] grid = new CellType[10, 10];
 
@@ -67,24 +69,31 @@ namespace MatchThreeGame
 
                 Console.WriteLine();
             }
+            
+            Console.WriteLine();
         }
 
         private static void RefreshGrid()
         {
-            ((int, int), (int, int))? points;
+            ((int, int) point, (int, int) direction)? match;
             do
             {
-                points = FindMatch();
+                match = FindMatch();
                 
-                if (!points.HasValue) continue;
+                if (!match.HasValue) continue;
                 
-                Console.WriteLine($"Point: {points.Value.Item1.Item1}, {points.Value.Item1.Item2}");
-                Console.WriteLine($"Direction: {points.Value.Item2.Item1}, {points.Value.Item2.Item2}");
+                Console.WriteLine($"Point: {match.Value.Item1.Item1}, {match.Value.Item1.Item2}");
+                Console.WriteLine($"Direction: {match.Value.Item2.Item1}, {match.Value.Item2.Item2}");
+                
+                // Find cluster
+                ISet<(int, int)> cellsToRemove = FindCluster(match.Value.point);
+                cellsToRemove.ToList().ForEach(cell => Console.WriteLine($"({cell.Item1}, {cell.Item2})"));
+                cellsToRemove.ToList().ForEach(cell => grid[cell.Item1, cell.Item2] = EmptyCellType);
+                WriteGrid();
                 break; // this is temporary
-                // LinkedList<Tuple<int, int>> removedPoints = RemoveMatch(point.Value, direction);
                 // Shift(removedPoints);
                 // FillEmptyCells();
-            } while (points.HasValue);
+            } while (match.HasValue);
         }
 
         private static ((int x, int y) point, (int x, int y) direction)? FindMatch()
@@ -114,6 +123,58 @@ namespace MatchThreeGame
             }
 
             return null;
+        }
+
+        private static ISet<(int, int)> FindCluster((int, int) point)
+        {
+            // Implementation of a simple iterative graph search algorithm
+            ISet<(int, int)> fringe = new HashSet<(int, int)>();
+            ISet<(int, int)> visited = new HashSet<(int, int)>();
+            (int, int) currentPoint = point;
+
+            List<(int, int)> GetNeighboursWithSameSymbol() =>
+                // Add neighbouring cells with same symbol to the fringe set
+                GetNeighbours(currentPoint)
+                    .Where(p => grid[p.Item1, p.Item2].Symbol == grid[currentPoint.Item1, currentPoint.Item2].Symbol)
+                    .ToList();
+
+            List<(int, int)> neighbours = GetNeighboursWithSameSymbol();
+            fringe.UnionWith(neighbours);
+
+            while (fringe.Count != 0)
+            {
+                // Get arbitrary item from fringe set
+                using var enumerator = fringe.GetEnumerator();
+                enumerator.MoveNext();
+                currentPoint = enumerator.Current;
+                
+                visited.Add(currentPoint);
+                neighbours = GetNeighboursWithSameSymbol();
+                fringe.UnionWith(neighbours);
+                fringe.ExceptWith(visited);
+            }
+
+            return visited;
+        }
+
+        private static List<(int, int)> GetNeighbours((int, int) point)
+        {
+            const int radius = 1;
+            List<(int, int)> neighbours = new List<(int, int)>((int) Math.Pow((radius * 2) + 1, 2) - 1);
+            
+            // Generate all neighbouring points that are within the grid boundaries
+            for (int i = point.Item1 - radius; i <= point.Item1 + radius; i++)
+            {
+                for (int j = point.Item2 - radius; j <= point.Item2 + radius; j++)
+                {
+                    if (i >= 0 && i < grid.GetLength(0) && j >= 0 && j < grid.GetLength(1) && (i, j) != point)
+                    {
+                        neighbours.Add((i, j));
+                    }
+                }
+            }
+
+            return neighbours;
         }
 
         private static bool AllEqual(char c1, char c2, char c3)
