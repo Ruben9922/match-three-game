@@ -90,8 +90,15 @@ namespace MatchThreeGame
                 cellsToRemove.ToList().ForEach(cell => Console.WriteLine($"({cell.Item1}, {cell.Item2})"));
                 cellsToRemove.ToList().ForEach(cell => grid[cell.Item1, cell.Item2] = EmptyCellType);
                 WriteGrid();
+                ISet<(int, int)> blankCells = cellsToRemove;
+                while (blankCells.Count > 0)
+                {
+                    Shift(blankCells);
+                    // TODO: Blank cells are cells in the grid where there's no symbol
+                    // blankCells = 
+                }
+                WriteGrid();
                 break; // this is temporary
-                // Shift(removedPoints);
                 // FillEmptyCells();
             } while (match.HasValue);
         }
@@ -155,6 +162,18 @@ namespace MatchThreeGame
             }
 
             return visited;
+        }
+
+        private static void Shift(ISet<(int, int)> removedPoints)
+        {
+            foreach ((int, int) point in removedPoints)
+            {
+                for (int j = point.Item2; j > 0; j--)
+                {
+                    grid[point.Item1, j] = grid[point.Item1, j - 1];
+                }
+                Fill((point.Item1, 0));
+            }
         }
 
         private static List<(int, int)> GetNeighbours((int, int) point)
