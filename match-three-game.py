@@ -5,7 +5,7 @@ import numpy as np
 
 
 class Game:
-    symbols = ["A", "B", "C", "D"]
+    symbols = ["A", "B", "C", "D", "E", "F"]
     empty_symbol = " "
 
     def __init__(self, stdscr, colors):
@@ -184,7 +184,9 @@ def main(stdscr):
         curses.COLOR_WHITE,
         curses.COLOR_CYAN,
         curses.COLOR_MAGENTA,
-        curses.COLOR_GREEN
+        curses.COLOR_GREEN,
+        curses.COLOR_RED,
+        curses.COLOR_YELLOW
     ]
     for i, color in enumerate(colors):
         curses.init_pair(i + 1, color, curses.COLOR_BLACK)
