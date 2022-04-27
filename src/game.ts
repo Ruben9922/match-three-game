@@ -10,7 +10,7 @@ export function generateGrid(): Grid {
   return R.range(0, gridSize[0]).map(() => R.range(0, gridSize[1]).map(getRandomSymbol));
 }
 
-export function refreshGrid(grid: Grid) {
+export function refreshGrid(grid: Grid): void {
   if (gridContainsEmptyCells(grid)) {
     shift(grid);
   } else {
@@ -85,17 +85,17 @@ export function findMatch(grid: Grid): Point[] | null {
   return null;
 }
 
-function isPointInsideGrid(point: Point) {
+function isPointInsideGrid(point: Point): boolean {
   return point[0] >= 0 && point[0] < gridSize[0] && point[1] >= 0 && point[1] < gridSize[1];
 }
 
-function clearCells(grid: Grid, points: Point[]) {
+function clearCells(grid: Grid, points: Point[]): void {
   for (const point of points) {
     grid[point[0]][point[1]] = null;
   }
 }
 
-function shift(grid: Grid) {
+function shift(grid: Grid): void {
   for (let columnIndex = 0; columnIndex < gridSize[1]; columnIndex++) {
     // Row index of the lowest empty cell in the column
     const lowestEmptyRowIndex = R.findLast(rowIndex => grid[rowIndex][columnIndex] === null, R.range(0, gridSize[0]));
