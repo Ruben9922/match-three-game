@@ -1,6 +1,6 @@
 import * as R from "ramda";
 
-type Point = [number, number];
+export type Point = [number, number];
 type Grid = (number | null)[][];
 
 export const symbolCount: number = 5;
