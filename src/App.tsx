@@ -46,13 +46,9 @@ function reducer(draft: AppState, action: AppAction): void {
           const updatedGrid = swap(action.point, draft.selected, draft.grid);
           if (findMatch(updatedGrid) !== null) {
             draft.grid = updatedGrid;
-            draft.selected = null;
-          } else {
-            draft.selected = null;
           }
-        } else {
-          draft.selected = null;
         }
+        draft.selected = null;
       } else {
         draft.selected = action.point;
       }
