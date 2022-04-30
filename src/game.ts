@@ -1,7 +1,8 @@
 import * as R from "ramda";
+import produce from "immer";
 
 export type Point = [number, number];
-type Grid = (number | null)[][];
+export type Grid = (number | null)[][];
 
 export const symbolCount: number = 5;
 const gridSize: Point = [10, 10];
@@ -120,4 +121,17 @@ function getRandomSymbol(): number {
 
 function gridContainsEmptyCells(grid: Grid): boolean {
   return R.any(row => R.any(symbol => symbol === null, row), grid);
+}
+
+export function areAdjacent(point1: Point, point2: Point): boolean {
+  return (point1[0] === point2[0] && (point1[1] === point2[1] - 1 || point1[1] === point2[1] + 1))
+    || (point1[1] === point2[1] && (point1[0] === point2[0] - 1 || point1[0] === point2[0] + 1));
+}
+
+export function swap(point1: Point, point2: Point, grid: Grid): Grid {
+  return produce(grid, (draft: Grid) => {
+    const temp = draft[point1[0]][point1[1]];
+    draft[point1[0]][point1[1]] = draft[point2[0]][point2[1]];
+    draft[point2[0]][point2[1]] = temp;
+  })
 }
